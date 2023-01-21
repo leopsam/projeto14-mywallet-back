@@ -7,3 +7,8 @@ export const userSchema = joi.object({
     confPassword: joi.string().valid(joi.ref('password')).required()
 });
 
+export const loginSchema = joi.object({
+    email: joi.string().email().required(),
+    password: joi.string().required(),
+});
+

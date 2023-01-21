@@ -1,6 +1,4 @@
-//import { WalletSchema } from '../model/WalletSchema.js'
 import db from '../config/database.js'
-import joi from 'joi'
 import dayjs from 'dayjs'
 import { ObjectId } from "mongodb"
 
@@ -10,18 +8,16 @@ let data = dayjs().format("DD/MM")
 export async function  getHome(req, res) {
     console.log("Rodou Get Home")
   
-    const { authorization } = req.headers
-    const token = authorization.replace('Bearer ', '')
+    const session = res.locals.sessao
   
-    if(!token) return res.sendStatus(401)
-  
-    const session = await db.collection("sessions").findOne({ token })
-    if (!session) return res.sendStatus(401)   
+    if (!session) return res.status(401).send("Não existe sessão ativa!") 
   
     const user = await db.collection("users").findOne({	_id: session.userId })
-    if (!user) return res.send("Você não fez login").status(401)
+
+    if (!user) return res.status(401).send("Você não fez login")
   
     const wallet = await db.collection("wallet").find({ userId: user._id }).toArray()
+    
     if(wallet) { 
         res.send(wallet).status(200)
     } else {
@@ -32,12 +28,8 @@ export async function  getHome(req, res) {
 export async function getCalculo(req, res) {
     console.log("Rodou Get Calculo")
     let calc = 0
-    const { authorization } = req.headers
-    const token = authorization.replace('Bearer ', '')
+    const session = res.locals.sessao
   
-    if(!token) return res.sendStatus(401)
-  
-    const session = await db.collection("sessions").findOne({ token })
     if (!session) return res.sendStatus(401)
   
     const user = await db.collection("users").findOne({	_id: session.userId })
@@ -63,13 +55,11 @@ export async function getCalculo(req, res) {
 //-----------------------NOVA-ENTRADA-----------------------------------
 export async function postNovaEntrada(req, res) {
     console.log("Rodou POST Nova Entrada")
-    const { authorization } = req.headers
-    const token = authorization.replace('Bearer ', '')
+    const session = res.locals.sessao
 
     const { descricao, valor } = req.body; 
 
-    try {
-        const session = await db.collection("sessions").findOne({ token })
+    try {        
         await db.collection("wallet").insertOne({ userId: session.userId, descricao, valor: Number(valor), date: data, status: "in" })
 
         res.sendStatus(201)
@@ -80,13 +70,11 @@ export async function postNovaEntrada(req, res) {
 //-----------------------NOVA-SAIDA-----------------------------------
 export async function postNovaSaida(req, res) {
     console.log("Rodou POST Nova Saida")
-    const { authorization } = req.headers
-    const token = authorization.replace('Bearer ', '')
+    const session = res.locals.sessao
 
     const { descricao, valor } = req.body; 
 
     try {
-        const session = await db.collection("sessions").findOne({ token })
         await db.collection("wallet").insertOne({ userId: session.userId, descricao, valor: Number(valor), date: data, status: "out" })
   
         res.sendStatus(201)
