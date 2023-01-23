@@ -116,9 +116,3 @@ export async function putItem(req, res) {
     }
 
 }
-
-//app.get("/home", async (req, res) => { })
-//app.get("/calculo", async (req, res) => { })
-//app.post("/nova-entrada", async (req, res) => { })
-//app.post("/nova-saida", async (req, res) => { })  
-//app.delete("/deletar-item/:id", async (req, res) => {})
